@@ -26,6 +26,17 @@ class _ClassManagePageState extends State<ClassManagePage>{
     });
   }
 
+  void refresh(){
+    crmList.clear();
+    classRoomProvider.getAll().then((lists){
+      setState(() {
+        lists.forEach((e){
+          crmList.add(e);
+        });
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
