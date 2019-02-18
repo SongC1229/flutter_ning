@@ -46,7 +46,7 @@ class _ClassManagePageState extends State<ClassManagePage>{
           child: AppBar(title: Text("我的班级"),
           actions: <Widget>[
             IconButton(
-                icon: Icon(Icons.add,size:30,color: Colors.lightBlue),
+                icon: Icon(Icons.add,size:30,color: Colors.white),
                 highlightColor: Colors.transparent,
                 onPressed: (){
                   showDialog(

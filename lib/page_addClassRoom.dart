@@ -173,7 +173,7 @@ class _AddClassPageState extends State<AddClassPage> {
                   centerTitle:false,
                   title: Text('添加班级',style: new TextStyle(fontFamily: Config.font,)),
                   actions: <Widget>[
-                    IconButton(icon: Icon(Icons.save),color: Colors.white70,onPressed: (){
+                    IconButton(icon: Icon(Icons.save),color: Colors.white,onPressed: (){
                       if(classRoom.name==''){
                         showDialog(
                             context: context,
