@@ -9,21 +9,14 @@ class CoursePage extends StatefulWidget {
 
 class _CoursePageState extends State<CoursePage>{
 
-  List<String> classSite=[];
-  List<String> courseName=[];
   @override
   void initState() {
     super.initState();
-    for(int i=0;i<40;i++){
-      classSite.add("");
-      courseName.add("");
-    }
     initCourse(refresh);
   }
 
   void refresh(){
     setState(() {
-      print("加载完成");
     }
     );
   }
@@ -47,7 +40,7 @@ class _CoursePageState extends State<CoursePage>{
         child:
         Column(
           children: <Widget>[
-            _buildDay(),
+            _buildTop(),
             Expanded(
               child:
               CustomScrollView(
@@ -55,7 +48,7 @@ class _CoursePageState extends State<CoursePage>{
                   SliverFixedExtentList(
                     itemExtent: 90.0,
                     delegate: SliverChildListDelegate(
-                        _buildCourse()
+                        _buildTable()
                     ),
                   )
                   ,
@@ -69,7 +62,7 @@ class _CoursePageState extends State<CoursePage>{
     );
   }
 
-  Widget _buildDay(){
+  Widget _buildTop(){
     return Row(
 
       children: <Widget>[
@@ -106,7 +99,7 @@ class _CoursePageState extends State<CoursePage>{
     );
   }
 
-  List<Widget> _buildCourse() {
+  List<Widget> _buildTable() {
     List<Widget> table=[];
     for (int i=0;i<8;i++){
       table.add(_buildRow(i));
@@ -157,10 +150,10 @@ class _CoursePageState extends State<CoursePage>{
               height: 84,
               padding: EdgeInsets.only(top: 2,bottom: 2),
               margin: EdgeInsets.only(left: 2.0,right: 2.0),
-              child: Text(courseName+classSite,textAlign: TextAlign.center,style: TextStyle(color: Colors.white),),
+              child: Text(courseName+'\n'+classSite,textAlign: TextAlign.center,style: TextStyle(color: Colors.white),),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-                  color:courseName+classSite==""?Config.itemColors[col]:Config.itemColors[col]
+                  color:courseName+classSite==""?Colors.transparent:Config.itemColors[col]
               ),
             ),
         )

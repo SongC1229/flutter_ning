@@ -41,6 +41,10 @@ void initCourse( Function refreshApp) async{
     new File(coursePath).writeAsString(jsonString);
   }
   else{
+    if(Config.courseList.length==40){
+      return;
+    }
+    else{
     new File(coursePath).readAsString().then((value){
       Config.courseList.clear();
       print("加载course.json");
@@ -51,10 +55,11 @@ void initCourse( Function refreshApp) async{
       });
       refreshApp();
     });
+    }
   }
 }
 
-void updateCourse() async{
+void updateCourseToFile() async{
   if(Config.docDir==null){
     Config.docDir = (await getApplicationDocumentsDirectory()).path;
   }

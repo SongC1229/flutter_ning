@@ -31,16 +31,16 @@ class _CourseDialogState extends State<CourseDialog>{
   void _updateCourse(int index,int classId,String courseName){
 
     setState(() {
-      String site='';
       crmList.forEach((e){
-        if(e.id==classId)
-          site=e.site;
+        if(e.id==classId){
+          //更新文件
+          Config.courseList[index]['courseName']=courseName;
+          Config.courseList[index]['classSite']=e.site;
+          Config.courseList[index]['classId']=classId;
+          updateCourseToFile();
+        }
       });
-      //更新文件
-      Config.courseList[index]['courseName']=courseName;
-      Config.courseList[index]['classSite']=site;
-      Config.courseList[index]['classId']=classId;
-      updateCourse();
+
     });
   }
 
@@ -51,7 +51,7 @@ class _CourseDialogState extends State<CourseDialog>{
       child: new Center( //保证控件居中效果
         child: new SizedBox(
           width: 280.0,
-          height:300.0,
+          height:280.0,
           child: new Container(
             decoration: new BoxDecoration(
               borderRadius: new BorderRadius.all(new Radius.circular(10.0)),

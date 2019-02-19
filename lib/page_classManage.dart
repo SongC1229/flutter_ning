@@ -126,10 +126,21 @@ class _ClassManagePageState extends State<ClassManagePage> {
                             builder: (BuildContext context) {
                               return _buildAlterDialog(crm.name);
                             }).then((val) {
-                          if (val == true)
+                          if (val == true){
+                            //删除相关课程
+                            Config.courseList.forEach((e){
+                              if(e['classId']==crm.id){
+                                e['classId']=-1;
+                                e['courseName']='';
+                                e['classSite']='';
+                              }
+                            });
+                            updateCourseToFile();
+                            //删除班级
                             classRoomProvider.delete(crm.id).whenComplete(() {
                               _refresh();
                             });
+                          }
                         }
                         );
                       }
@@ -163,7 +174,7 @@ class _ClassManagePageState extends State<ClassManagePage> {
   Widget _buildAlterDialog(String crmName) {
     return AlertDialog(
       contentPadding: EdgeInsets.only(left: 10),
-      title: new Text("删除", style: TextStyle(fontSize: 18),),
+      title: new Text("删除班级", style: TextStyle(fontSize: 18),),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       content: new SingleChildScrollView(
         padding: EdgeInsets.all(15),
@@ -174,7 +185,7 @@ class _ClassManagePageState extends State<ClassManagePage> {
               color: Colors.grey,
               height: 1.5,
             ),
-            new Text('确定删除班级：\n    $crmName',style: TextStyle(height: 1.3),),
+            new Text('相关课程将同时清除：\n    $crmName',style: TextStyle(height: 1.3),),
           ],
         ),
       ),
