@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'config.dart';
+import 'dialog_alterCourse.dart';
 
 class CoursePage extends StatefulWidget {
   @override
@@ -8,10 +9,23 @@ class CoursePage extends StatefulWidget {
 
 class _CoursePageState extends State<CoursePage>{
 
-
+  List<String> classSite=[];
+  List<String> courseName=[];
   @override
   void initState() {
     super.initState();
+    for(int i=0;i<40;i++){
+      classSite.add("");
+      courseName.add("");
+    }
+    initCourse(refresh);
+  }
+
+  void refresh(){
+    setState(() {
+      print("加载完成");
+    }
+    );
   }
 
   @override
@@ -23,25 +37,34 @@ class _CoursePageState extends State<CoursePage>{
           child: AppBar(title: Text("我的課程"),)
       ),
       backgroundColor:Config.containBkg,
-      body: Column(
-        children: <Widget>[
-          _buildDay(),
-          Expanded(
-            child:
-            CustomScrollView(
-              slivers: <Widget>[
-                SliverFixedExtentList(
-                  itemExtent: 90.0,
-                  delegate: SliverChildListDelegate(
-                      _buildCourse()
-                  ),
-                )
-                ,
-              ]
-            )
-
+      body:Container(
+        decoration: new BoxDecoration(
+          image: new DecorationImage(
+              image:ExactAssetImage("asset/coursebkg.jpg"),
+              fit: BoxFit.cover
           ),
-        ],
+        ),
+        child:
+        Column(
+          children: <Widget>[
+            _buildDay(),
+            Expanded(
+              child:
+              CustomScrollView(
+                slivers: <Widget>[
+                  SliverFixedExtentList(
+                    itemExtent: 90.0,
+                    delegate: SliverChildListDelegate(
+                        _buildCourse()
+                    ),
+                  )
+                  ,
+                ]
+              )
+
+            ),
+          ],
+        )
       )
     );
   }
@@ -55,28 +78,28 @@ class _CoursePageState extends State<CoursePage>{
         ),
         Expanded(
           child:Container(
-            child: Text("周一",textAlign: TextAlign.center,),
+            child: Text("周一",textAlign: TextAlign.center,style:TextStyle(fontSize: 16),),
           ),
         ),
         Expanded(
           child:Container(
-            child: Text("周二",textAlign: TextAlign.center,),
+            child: Text("周二",textAlign: TextAlign.center,style:TextStyle(fontSize: 16),),
           ),
         ),
         Expanded(
           child:Container(
-            child: Text("周三",textAlign: TextAlign.center,),
+            child: Text("周三",textAlign: TextAlign.center,style:TextStyle(fontSize: 16),),
           ),
         ),
         Expanded(
           child:Container(
-            child: Text("周四",textAlign: TextAlign.center,),
+            child: Text("周四",textAlign: TextAlign.center,style:TextStyle(fontSize: 16),),
           ),
         ) ,
         Expanded(
           child:Container(
             padding: EdgeInsets.only(top: 4,bottom: 3),
-            child: Text("周五",textAlign: TextAlign.center,),
+            child: Text("周五",textAlign: TextAlign.center,style:TextStyle(fontSize: 16),),
           ),
         ),
     ],
@@ -109,17 +132,38 @@ class _CoursePageState extends State<CoursePage>{
   }
 
   Widget _buildItem(int row,int col){
-    return  Expanded(
-      child:Container(
-        height: 84,
-        padding: EdgeInsets.only(top: 2,bottom: 2),
-        margin: EdgeInsets.only(left: 2.0,right: 2.0),
-        child: Text(Config.weekDaysTwo[col],textAlign: TextAlign.center,),
-        decoration: new BoxDecoration(
-            borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-            color:row-col==0?Colors.transparent:Config.itemColors[col]
-        ),
-      ),
-    );
+    String courseName='';
+    String classSite='';
+    if(Config.courseList.length==40) {
+      classSite = Config.courseList[row * 5 + col]["classSite"];
+      courseName = Config.courseList[row * 5 + col]["courseName"];
+    }
+    return
+          Expanded(
+            child:GestureDetector(
+              onTap: (){
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return CourseDialog(index:row * 5 + col);
+                    }).then((val){
+                      setState(() {
+
+                      });
+                });
+              },
+            child:Container(
+              height: 84,
+              padding: EdgeInsets.only(top: 2,bottom: 2),
+              margin: EdgeInsets.only(left: 2.0,right: 2.0),
+              child: Text(courseName+classSite,textAlign: TextAlign.center,style: TextStyle(color: Colors.white),),
+              decoration: new BoxDecoration(
+                  borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
+                  color:courseName+classSite==""?Config.itemColors[col]:Config.itemColors[col]
+              ),
+            ),
+        )
+      );
   }
 }

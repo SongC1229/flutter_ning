@@ -193,14 +193,11 @@ class StudentProvider {
 
   Future open(Database database) async {
     db=database;
-//    String path=await getDatabasesPath();
-//    path=path+dbName;
-//    db = await openDatabase(path, version: 1);
   }
 
   Future<Student> insert(Student student) async {
     if(student.id!=null){
-      print("exist student to update");
+      print("exist to update");
       update(student);
     }else{
       print(student.toMap());
@@ -239,6 +236,7 @@ class StudentProvider {
   }
 
   Future<int> update(Student student) async {
+    print(student.toMap());
     return await db.update(tableStudent, student.toMap(),
         where: '$studentId = ?', whereArgs: [student.id]);
   }
@@ -298,9 +296,6 @@ class RosterProvider {
   Database db;
 
   Future open(Database database) async {
-//    String path=await getDatabasesPath();
-//    path=path+dbName;
-//    db = await openDatabase(path, version: 1);
     db=database;
   }
 

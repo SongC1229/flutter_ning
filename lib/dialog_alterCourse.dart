@@ -1,17 +1,48 @@
 import 'package:flutter/material.dart';
 import 'config.dart';
-class AddStudentDialog extends StatefulWidget {
-  const AddStudentDialog({@required this.addStudent});
-  final addStudent;
+import 'dbHelper.dart';
+class CourseDialog extends StatefulWidget {
+  const CourseDialog({@required this.index});
+  final index;
   @override
-  _AddStudentDialogState createState() => new _AddStudentDialogState();
+  _CourseDialogState createState() => new _CourseDialogState();
 }
 
-class _AddStudentDialogState extends State<AddStudentDialog>{
+class _CourseDialogState extends State<CourseDialog>{
 
-  String studentName='';
-  int studentID=-1;
-  int studentSex=0;
+  ClassRoomProvider classRoomProvider=new ClassRoomProvider();
+  List<ClassRoom> crmList = [];
+  String courseName='';
+  int classId=-1;
+  @override
+  void initState() {
+    super.initState();
+    classRoomProvider.open().whenComplete(() {
+      classRoomProvider.getAll().then((lists) {
+        setState(() {
+          lists.forEach((e) {
+            crmList.add(e);
+          });
+        });
+      });
+    });
+  }
+
+  void _updateCourse(int index,int classId,String courseName){
+
+    setState(() {
+      String site='';
+      crmList.forEach((e){
+        if(e.id==classId)
+          site=e.site;
+      });
+      //更新文件
+      Config.courseList[index]['courseName']=courseName;
+      Config.courseList[index]['classSite']=site;
+      Config.courseList[index]['classId']=classId;
+      updateCourse();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,40 +62,7 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      new Container(
-                        height:30,
-                        margin:const EdgeInsets.fromLTRB(10.0, 15.0, 10.0, 5.0),
-                        child:Row(children: <Widget>[
-                          Container(width:30.0,child:Icon(Icons.loyalty,color: Colors.cyan)),
-                          Container(
-                            width:170,
-                            child:new Align(
-                              alignment:FractionalOffset.centerLeft,
-                              child: new Text(" 學生",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.normal,
-                                    letterSpacing: 5.0,
-                                    fontFamily: Config.font
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 60,
-                            child:FloatingActionButton(
-                              onPressed: (){
-                                Navigator.pop(context); //关闭对话框
-                              },
-                              tooltip: '关闭',
-                              backgroundColor: Colors.red,
-                              child: new Icon(Icons.close),
-                            ),
-                          ),
-                        ],
-                        ),
-                      ),
+                      _buildTop(),
                       new Container(
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
                         color:Colors.black54,
@@ -82,7 +80,7 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
                         child:Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                          Text("學號：",
+                          Text("班级：",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16.0,
@@ -92,12 +90,12 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
                           ),
                           TextField(
                               onChanged: (num){//输入监听
-                                studentID=int.parse(num);
+                                classId=int.parse(num);
                               },
                               keyboardType: TextInputType.number,//设置输入框文本类型
                               textAlign: TextAlign.left,//设置内容显示位置是否居中等
                               decoration: new InputDecoration(
-                                hintText: '選填',
+                                hintText: '班级id',
                               ),
                               style: TextStyle(
                                   color: Colors.black,
@@ -108,7 +106,7 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
                               ),
                           ),
                           Padding(padding: EdgeInsets.only(top: 5.0),),
-                          Text("姓名：",
+                          Text("课程：",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16.0,
@@ -118,12 +116,12 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
                           ),
                           TextField(
                               onChanged: (String str){//输入监听
-                               studentName=str;
+                               courseName=str;
                               },
                               keyboardType: TextInputType.text,//设置输入框文本类型
                               textAlign: TextAlign.left,//设置内容显示位置是否居中等
                               decoration: new InputDecoration(
-                                hintText:"姓名",
+                                hintText:"课程名称",
                               ),
                             style: TextStyle(
                                 color: Colors.black,
@@ -150,8 +148,8 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
                             ),
                             color: Colors.lightBlue,
                             onPressed: (){
-//                              widget.addStudent(Student(seatId: studentID,name: studentName,sex: studentSex));
-                              Navigator.of(context).pop();
+                                _updateCourse(widget.index,classId,courseName);
+                               Navigator.of(context).pop();
                             },),
 
                           Padding(padding: EdgeInsets.only(left: 10.0),),
@@ -179,6 +177,44 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
       ),
     );
   }
+
+  Widget _buildTop(){
+    return new Container(
+      height:30,
+      margin:const EdgeInsets.fromLTRB(10.0, 15.0, 10.0, 5.0),
+      child:Row(children: <Widget>[
+        Container(width:30.0,child:Icon(Icons.loyalty,color: Colors.cyan)),
+        Container(
+          width:170,
+          child:new Align(
+            alignment:FractionalOffset.centerLeft,
+            child: new Text(" 添加课程",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.normal,
+                  letterSpacing: 5.0,
+                  fontFamily: Config.font
+              ),
+            ),
+          ),
+        ),
+        Container(
+          width: 60,
+          child:FloatingActionButton(
+            onPressed: (){
+              Navigator.pop(context); //关闭对话框
+            },
+            tooltip: '关闭',
+            backgroundColor: Colors.red,
+            child: new Icon(Icons.close),
+          ),
+        ),
+      ],
+      ),
+    );
+  }
+
 }
 
 

@@ -6,7 +6,7 @@ import 'page_note.dart';
 import 'page_grade.dart';
 import 'page_sign.dart';
 import 'mydrawer.dart';
-import 'page_addClassRoom.dart';
+import 'page_addClass.dart';
 void main() => runApp(Home());
 
 class Home extends StatefulWidget {

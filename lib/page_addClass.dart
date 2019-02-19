@@ -3,7 +3,8 @@ import 'config.dart';
 import 'dbHelper.dart';
 
 class AddClassPage extends StatefulWidget {
-  AddClassPage({this.classroom});
+  AddClassPage({this.classroom,this.refreshManage});
+  final refreshManage;
   final classroom;
   @override
   _AddClassPageState createState() => _AddClassPageState();
@@ -15,6 +16,7 @@ class _AddClassPageState extends State<AddClassPage> {
   StudentProvider studentProvider=StudentProvider();
   ClassRoom classRoom=ClassRoom(id:null,name: '',site: '',sum: -1);
   List<Student> _students=[];
+  String barTitle="添加班级";
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,7 @@ class _AddClassPageState extends State<AddClassPage> {
         //更新班级
         if(widget.classroom!=null){
           classRoom=widget.classroom;
+          barTitle='修改班级';
           studentProvider.getAll(classRoom.id).then((list){
             setState(() {
               list.forEach((e){
@@ -93,6 +96,9 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
   void _onWillPop(){
+    if(widget.refreshManage!=null){
+      widget.refreshManage();
+    }
     if(classRoom.id!=null){
       Navigator.of(context).pop(false);
     }
@@ -101,6 +107,7 @@ class _AddClassPageState extends State<AddClassPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           contentPadding: EdgeInsets.only(left: 10),
           title: new Text("退出",style: TextStyle(fontSize: 18),),
           content: new SingleChildScrollView(
@@ -171,7 +178,7 @@ class _AddClassPageState extends State<AddClassPage> {
               child:AppBar(
                   elevation: 2,
                   centerTitle:false,
-                  title: Text('添加班级',style: new TextStyle(fontFamily: Config.font,)),
+                  title: Text('$barTitle',style: new TextStyle(fontFamily: Config.font,)),
                   actions: <Widget>[
                     IconButton(icon: Icon(Icons.save),color: Colors.white,onPressed: (){
                       if(classRoom.name==''){
@@ -308,6 +315,8 @@ class _AddClassPageState extends State<AddClassPage> {
               onPressed: (){
                 setState(() {
                   _students.remove(student);
+                  if(student.id!=null)
+                    studentProvider.delete(student.id);
                 });
               },
               icon: Icon(Icons.delete,color: Colors.blue,),
@@ -408,7 +417,7 @@ class _AddClassPageState extends State<AddClassPage> {
               padding: EdgeInsets.only(top: 10),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-                  color:Config.containBkg
+//                  color:Config.containBkg
               ),
               child:Text("性 別",maxLines: 1,style: new TextStyle(fontSize:16),textAlign: TextAlign.center,),
             ),
@@ -421,7 +430,7 @@ class _AddClassPageState extends State<AddClassPage> {
               padding: EdgeInsets.only(top: 10),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-                  color:Config.containBkg
+//                  color:Config.containBkg
               ),
               child:Text("座 號",maxLines: 1,style: new TextStyle(fontSize:16),textAlign: TextAlign.center,),
             ),
@@ -434,7 +443,7 @@ class _AddClassPageState extends State<AddClassPage> {
               padding: EdgeInsets.only(top: 10),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-                  color:Config.containBkg
+//                  color:Config.containBkg
               ),
               child:Text('姓 名',maxLines: 1,style: new TextStyle(fontSize:16),textAlign: TextAlign.center,),
             ),
@@ -447,7 +456,7 @@ class _AddClassPageState extends State<AddClassPage> {
               padding: EdgeInsets.only(top: 10),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-                  color:Config.containBkg
+//                  color:Config.containBkg
               ),
               child:Text("刪 除",maxLines: 1,style: new TextStyle(fontSize:16),textAlign: TextAlign.center,),
             ),
