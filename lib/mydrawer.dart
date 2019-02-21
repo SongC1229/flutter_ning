@@ -28,12 +28,12 @@ class _MyDrawerState extends State<MyDrawer> {
                     _userHeader(),
                     new Divider(color: Colors.grey, height: 1,), //分割线控件
                     ListTile(
-                      title: Text("签 名",
+                      title: Text("签名",
                         style: TextStyle(
                             color: Colors.black,
                             fontSize: 16.0,
                             fontWeight: FontWeight.normal,
-                            letterSpacing: 5.0,
+                            letterSpacing: 4.0,
 
                         ),
                       ),
@@ -42,26 +42,12 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                     new Divider(color: Colors.grey, height: 1,), //分割线控件
                     ListTile(
-                      leading: Icon(Icons.brightness_2,color: Colors.cyan,),
-                      title: Text( "夜间",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.normal,
-                            letterSpacing: 5.0,
-                        ),
-                      ),
-                      onTap: () {
-                      },
-                    ),
-                    new Divider(color: Colors.grey, height: 1,), //分割线控件
-                    ListTile(
                       title: Text("班級管理",
                         style: TextStyle(
                             color: Colors.black,
                             fontSize: 16.0,
                             fontWeight: FontWeight.normal,
-                            letterSpacing: 5.0,
+                            letterSpacing: 4.0,
                         ),
                       ),
                       leading: Icon(Icons.account_balance,color: Colors.cyan,),
@@ -74,7 +60,7 @@ class _MyDrawerState extends State<MyDrawer> {
                             color: Colors.black,
                             fontSize: 16.0,
                             fontWeight: FontWeight.normal,
-                            letterSpacing: 5.0,
+                            letterSpacing: 4.0,
 
                         ),
                       ),
@@ -82,14 +68,28 @@ class _MyDrawerState extends State<MyDrawer> {
                       onTap:_showMyCourse,
                     ),
                     new Divider(color: Colors.grey, height: 1,), //分割线控件
+                    ListTile(
+                      leading: Icon(Icons.history,color: Colors.cyan,),
+                      title: Text("出勤历史",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.normal,
+                          letterSpacing: 4.0,
+                        ),
+                      ),
+                      onTap: () {
+                      },
+                    ),
+                    new Divider(color: Colors.grey, height: 1,), //分割线控件
                     new ListTile( //退出按钮
                         leading: Icon(Icons.info,color: Colors.cyan,),
-                        title: new Text('关 于',
+                        title: new Text('关于',
                           style: TextStyle(
                               color: Colors.black,
                               fontSize: 16.0,
                               fontWeight: FontWeight.normal,
-                              letterSpacing: 5.0,
+                              letterSpacing: 4.0,
                           ),
                         ),
                         onTap: _aboutPage

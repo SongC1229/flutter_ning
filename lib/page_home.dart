@@ -29,11 +29,13 @@ class _ClassPageState extends State<ClassPage>{
   void initState() {
     super.initState();
     _drawer=MyDrawer();
-    DateTime now = new DateTime.now();
-    int year =now.year;
-    int month=now.month;
-    int day =now.day;
-    week=getWeek(year,month,day);
+    if(GlobalData.todayWeek==-1){
+      DateTime now = new DateTime.now();
+      int year =now.year;
+      int month=now.month;
+      int day =now.day;
+      week=GlobalData.getWeek(year,month,day);
+    }
     var url = "http://wthrcdn.etouch.cn/weather_mini?city=台中";
     http.readBytes(url).then((repo){
       String rePo=utf8.decode(repo);

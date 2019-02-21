@@ -14,88 +14,46 @@ class SignPage extends StatefulWidget {
 
 class _SignPageState extends State<SignPage>{
 
-  ClassRoomProvider classRoomProvider=ClassRoomProvider();
-  StudentProvider studentProvider=StudentProvider();
-
-  //课程列
-  int _todayWeekCol;
-  //课程行
-  int _currentClassRow=-1;
-
-  String tableTop='';
-  List<Student> _students=[];
-  List<int> todayCourses=[];
-
-  bool isRefreshCourse=false;
-
   Widget _drawer;
+  String tableTop='';
+
   @override
   void initState() {
     super.initState();
-    classRoomProvider.open().whenComplete((){
-      studentProvider.open(classRoomProvider.db).whenComplete((){
-        initCourse(refreshCourses);
-      });
-    });
     _drawer=MyDrawer(refreshApp: widget.refreshApp);
-    DateTime now = new DateTime.now();
-    int year =now.year;
-    int month=now.month;
-    int day =now.day;
-    _todayWeekCol=getWeek(year,month,day)-1;
-  }
-
-  void getStudents(){
-    if(_currentClassRow<1)
-      return;
-    int classID=Config.courseList[(_currentClassRow-1)*5+_todayWeekCol]["classId"];
-    if(classID>0)
-    studentProvider.getAll(classID).then((list){
-            setState(() {
-              _students.clear();
-              if(list!=null)
-              list.forEach((e){
-                _students.add(e);
-              });
-            });
-          });
-  }
-
-  void refreshCourses(){
-    todayCourses.clear();
-    setState(() {
-      //当前应该显示节次
-      int row=analysisCount(DateTime.now().hour);
-      for(int i=8;i>0;i--){
-        if(Config.courseList[(i-1)*5+_todayWeekCol]["classId"]!=-1){
-          todayCourses.insert(0,i);
-          if(i>=row){
-            _currentClassRow=i;
-          }
-        }
-      }
-      if(todayCourses.isNotEmpty&&_currentClassRow==-1){
-        _currentClassRow=todayCourses.first;
-      }
-      getStudents();
+    GlobalData.initGlobalData().whenComplete((){
+      setState(() {
+      });
     });
   }
 
   //刷新节次和花名册
   void _select(int choice) {
-    isRefreshCourse=false;
-    getStudents();
     setState(() {
-      _currentClassRow=choice;
+      GlobalData.shouldClassRow=choice;
+      GlobalData.getShouldStudents().whenComplete((){
+        setState(() {
+        });
+      });
     });
   }
 
+  void refreshInfo()async{
+    GlobalData.coursesChange=false;
+    GlobalData.initTodayCourse();
+    GlobalData.getShouldStudents().whenComplete((){
+      setState(() {
+
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-//    if(Config.courseList!=null&&Config.courseList.length==40&&isRefreshCourse)
-//      refreshCourses();
-    List<Widget> conList=_students.map((student) {
+    //如果课程信息变动，刷新当天信息
+    if(GlobalData.coursesChange)
+      refreshInfo();
+    List<Widget> conList=GlobalData.shouldStudents.map((student) {
       return _buildItem(context,student);
     }).toList();
     conList.add(Container(height: 50,));
@@ -106,10 +64,10 @@ class _SignPageState extends State<SignPage>{
     String courseName='';
     String className='';
     String classNumString='无课';
-    if(_currentClassRow>0){
-      className=Config.courseList[(_currentClassRow-1)*5+_todayWeekCol]["className"];
-      courseName=Config.courseList[(_currentClassRow-1)*5+_todayWeekCol]["courseName"];
-      classNumString="第$_currentClassRow节";
+    if(GlobalData.shouldClassRow>0){
+      className=GlobalData.courseList[(GlobalData.shouldClassRow-1)*5+GlobalData.todayWeek-1]["className"];
+      courseName=GlobalData.courseList[(GlobalData.shouldClassRow-1)*5+GlobalData.todayWeek-1]["courseName"];
+      classNumString="第"+GlobalData.shouldClassRow.toString()+"节";
     }
     tableTop="$year 年 $month 月 $day 號 $classNumString\n$className $courseName";
     return
@@ -129,7 +87,7 @@ class _SignPageState extends State<SignPage>{
                   child: Row(
                   children: <Widget>[
                   Icon(Icons.arrow_drop_down),
-                  Text(_currentClassRow==-1?'无课':"第$_currentClassRow节",
+                  Text(GlobalData.shouldClassRow==-1?'无课':classNumString,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18.0,
@@ -142,7 +100,7 @@ class _SignPageState extends State<SignPage>{
                   ),
                   onSelected: _select,
                   itemBuilder: (BuildContext context) {
-                    if(todayCourses.isEmpty){
+                    if(GlobalData.todayCourseList.isEmpty){
                       return [PopupMenuItem<int>(
                         value: -1,
                         child: Text("无课",
@@ -155,7 +113,7 @@ class _SignPageState extends State<SignPage>{
                         ),
                       )];
                     }
-                    return todayCourses.map((int row) {
+                    return GlobalData.todayCourseList.map((int row) {
                       return PopupMenuItem<int>(
                         value: row,
                         child: Text("第$row节",
@@ -250,7 +208,6 @@ class _SignPageState extends State<SignPage>{
             child:IconButton(
               onPressed: (){
                 setState(() {
-                  _students.remove(student);
                 });
               },
               icon: Icon(Icons.home,color: Colors.grey[300],),
@@ -262,7 +219,6 @@ class _SignPageState extends State<SignPage>{
             child:IconButton(
               onPressed: (){
                 setState(() {
-                  _students.remove(student);
                 });
               },
               highlightColor: Colors.transparent,
@@ -353,21 +309,6 @@ class _SignPageState extends State<SignPage>{
         ),
       )
       );
-  }
-
-  int analysisCount(int hour){
-    switch(hour){
-      case 16:return 8;
-      case 15:return 7;
-      case 14:return 6;
-      case 13:
-      case 12:return 5;
-      case 11:return 4;
-      case 10:return 3;
-      case 9:return 2;
-      case 8:return 1;
-      default:return 1;
-    }
   }
 
 

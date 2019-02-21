@@ -36,23 +36,23 @@ class _CourseDialogState extends State<CourseDialog>{
       crmList.forEach((e){
         if(e.id==classId){
           havaId=true;
-          print(Config.courseList);
+          print(GlobalData.courseList);
           //更新文件
-          Config.courseList[index]['courseName']=courseName;
-          Config.courseList[index]['classSite']=e.site;
-          Config.courseList[index]['className']=e.name;
-          Config.courseList[index]['classId']=classId;
-          updateCourseToFile();
+          GlobalData.courseList[index]['courseName']=courseName;
+          GlobalData.courseList[index]['classSite']=e.site;
+          GlobalData.courseList[index]['className']=e.name;
+          GlobalData.courseList[index]['classId']=classId;
+          GlobalData.updateCourseToFile();
         }
       });
       if(!havaId){
         print("sffd");
-        Config.courseList[index]['courseName']='';
-        Config.courseList[index]['classSite']='';
-        Config.courseList[index]['className']='';
-        Config.courseList[index]['classId']=-1;
-        print(Config.courseList);
-        updateCourseToFile();
+        GlobalData.courseList[index]['courseName']='';
+        GlobalData.courseList[index]['classSite']='';
+        GlobalData.courseList[index]['className']='';
+        GlobalData.courseList[index]['classId']=-1;
+        print(GlobalData.courseList);
+        GlobalData.updateCourseToFile();
       }
 
     });
@@ -65,7 +65,7 @@ class _CourseDialogState extends State<CourseDialog>{
       child: new Center( //保证控件居中效果
         child: new SizedBox(
           width: 280.0,
-          height:280.0,
+          height:290.0,
           child: new Container(
             decoration: new BoxDecoration(
               borderRadius: new BorderRadius.all(new Radius.circular(10.0)),

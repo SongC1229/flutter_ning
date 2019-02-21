@@ -12,7 +12,7 @@ class _CoursePageState extends State<CoursePage>{
   @override
   void initState() {
     super.initState();
-    initCourse(refresh);
+//    initCourse(refresh);
   }
 
   void refresh(){
@@ -46,7 +46,7 @@ class _CoursePageState extends State<CoursePage>{
               CustomScrollView(
                 slivers: <Widget>[
                   SliverFixedExtentList(
-                    itemExtent: 90.0,
+                    itemExtent: 75.0,
                     delegate: SliverChildListDelegate(
                         _buildTable()
                     ),
@@ -113,7 +113,7 @@ class _CoursePageState extends State<CoursePage>{
         Container(
           padding: EdgeInsets.only(left: 2),
           width: 40,
-          child: Text(Config.courseTime[row],textAlign:TextAlign.center,),
+          child: Text(Config.courseTime[row],style: TextStyle(fontSize: 12),textAlign:TextAlign.center,),
         ),
         _buildItem(row, 0),
         _buildItem(row, 1),
@@ -128,10 +128,10 @@ class _CoursePageState extends State<CoursePage>{
     String courseName='';
     String classSite='';
     String className='';
-    if(Config.courseList.length==40) {
-      classSite = Config.courseList[row * 5 + col]["classSite"];
-      courseName = Config.courseList[row * 5 + col]["courseName"];
-      className = Config.courseList[row * 5 + col]["className"];
+    if(GlobalData.courseList.length==40) {
+      classSite = GlobalData.courseList[row * 5 + col]["classSite"];
+      courseName = GlobalData.courseList[row * 5 + col]["courseName"];
+      className = GlobalData.courseList[row * 5 + col]["className"];
     }
     return
           Expanded(
@@ -149,10 +149,10 @@ class _CoursePageState extends State<CoursePage>{
                 });
               },
             child:Container(
-              height: 84,
+              height: 71,
               padding: EdgeInsets.only(top: 2,bottom: 2),
-              margin: EdgeInsets.only(left: 2.0,right: 2.0),
-              child: Text("$courseName\n$classSite $className",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 12),),
+              margin: EdgeInsets.only(left: 3.0,right: 3.0),
+              child: Text("$courseName\n$classSite\n$className",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 12),),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
                   color:courseName+classSite==""?Colors.transparent:Config.itemColors[col]
