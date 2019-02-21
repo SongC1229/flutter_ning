@@ -197,10 +197,10 @@ class StudentProvider {
 
   Future<Student> insert(Student student) async {
     if(student.id!=null){
-      print("exist to update");
+//      print("exist to update");
       update(student);
     }else{
-      print(student.toMap());
+//      print(student.toMap());
     student.id = await db.insert(tableStudent, student.toMap()).catchError((){
     });
     }
@@ -236,7 +236,7 @@ class StudentProvider {
   }
 
   Future<int> update(Student student) async {
-    print(student.toMap());
+//    print(student.toMap());
     return await db.update(tableStudent, student.toMap(),
         where: '$studentId = ?', whereArgs: [student.id]);
   }

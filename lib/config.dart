@@ -10,7 +10,7 @@ class Config {
   static ThemeData themeData = new ThemeData(primarySwatch:Colors.blue);
   static String font="方正楷体";
   static List<Color> itemColors=[Color(0xFF99CCFF),Color(0xFFD6D5B7),Color(0xFF00E9A4),
-                                  Color(0xFFFF99CC),Color(0xFFB19072)];
+                                  Color(0xFFFF99CC),Color(0xFFB19072),Color(0xFF659072),Color(0xFFE29B9B)];
   static Color containBkg=Colors.white;
   static Color lineColors=Color(0xFFD3D6D8);
   static Color appBackground=Color(0xFFF5F5F5);
@@ -60,13 +60,12 @@ class GlobalData{
   }
   
   static Future initCourse() async{
-    if(courseList!=null&&courseList.length==40)
-      return;
     if(courseJsonPath==null){
       courseJsonPath = (await getApplicationDocumentsDirectory()).path+"/course.json";
     }
     bool courseExist=FileSystemEntity.isFileSync(courseJsonPath);
     if(!courseExist){
+      print("Create course.json");
       for (int i=0;i<40;i++){
         courseList.add({"classId":-1,"classSite":"","className":"","courseName":""});
       }
@@ -75,6 +74,7 @@ class GlobalData{
       new File(courseJsonPath).writeAsString(jsonString);
     }
     else {
+      print("Load course.json");
       await File(courseJsonPath).readAsString().then((value){
         courseList.clear();
         JsonDecoder decoder = new JsonDecoder();
@@ -108,12 +108,26 @@ class GlobalData{
     }
   }
 
+  static Future getShouldStudents() async{
+    if(shouldClassRow<1)
+      return;
+    int classID=courseList[(shouldClassRow-1)*5+todayWeek-1]["classId"];
+    if(classID>0)
+      await studentProvider.getAll(classID).then((list){
+        shouldStudents.clear();
+        if(list!=null)
+          list.forEach((e){
+            shouldStudents.add(e);
+          });
+      });
+  }
+
   //初始化当天信息
   static Future initGlobalData() async{
     //读取json文件 初始化课程表
     await initCourse().whenComplete(() async{
       //初始化courseList完成
-      print("Load course.json finish");
+      print("Load course finish");
       initTodayCourse();
       print("Init today course finish");
       await classRoomProvider.open().whenComplete(() async{
@@ -125,20 +139,6 @@ class GlobalData{
     });
   }
 
-  static Future getShouldStudents() async{
-    if(shouldClassRow<1)
-      return;
-    int classID=courseList[(shouldClassRow-1)*5+todayWeek-1]["classId"];
-    if(classID>0)
-    await studentProvider.getAll(classID).then((list){
-              shouldStudents.clear();
-              if(list!=null)
-              list.forEach((e){
-                shouldStudents.add(e);
-              });
-    });
-  }
-
   static void updateCourseToFile() async{
     if(courseJsonPath==null){
       courseJsonPath = (await getApplicationDocumentsDirectory()).path+"/course.json";
@@ -146,7 +146,7 @@ class GlobalData{
     if(!isWrite){
       isWrite=true;
       coursesChange=true;
-      print("更新course.json");
+      print("update course.json");
       JsonEncoder encoder=new JsonEncoder();
       String jsonString=encoder.convert(courseList);
       File(courseJsonPath).writeAsString(jsonString).whenComplete((){

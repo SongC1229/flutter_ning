@@ -43,7 +43,6 @@ class _SignPageState extends State<SignPage>{
     GlobalData.initTodayCourse();
     GlobalData.getShouldStudents().whenComplete((){
       setState(() {
-
       });
     });
   }
@@ -208,6 +207,7 @@ class _SignPageState extends State<SignPage>{
             child:IconButton(
               onPressed: (){
                 setState(() {
+
                 });
               },
               icon: Icon(Icons.home,color: Colors.grey[300],),

@@ -10,15 +10,13 @@ class CourseDialog extends StatefulWidget {
 
 class _CourseDialogState extends State<CourseDialog>{
 
-  ClassRoomProvider classRoomProvider=new ClassRoomProvider();
   List<ClassRoom> crmList = [];
   String courseName='';
   int classId=-1;
   @override
   void initState() {
     super.initState();
-    classRoomProvider.open().whenComplete(() {
-      classRoomProvider.getAll().then((lists) {
+      GlobalData.classRoomProvider.getAll().then((lists) {
         setState(() {
           if(lists!=null)
           lists.forEach((e) {
@@ -26,7 +24,6 @@ class _CourseDialogState extends State<CourseDialog>{
           });
         });
       });
-    });
   }
 
   void _updateCourse(int index,int classId,String courseName){
@@ -35,8 +32,8 @@ class _CourseDialogState extends State<CourseDialog>{
       bool havaId=false;
       crmList.forEach((e){
         if(e.id==classId){
+          print('update this course');
           havaId=true;
-          print(GlobalData.courseList);
           //更新文件
           GlobalData.courseList[index]['courseName']=courseName;
           GlobalData.courseList[index]['classSite']=e.site;
@@ -46,7 +43,7 @@ class _CourseDialogState extends State<CourseDialog>{
         }
       });
       if(!havaId){
-        print("sffd");
+        print("set this course empty");
         GlobalData.courseList[index]['courseName']='';
         GlobalData.courseList[index]['classSite']='';
         GlobalData.courseList[index]['className']='';

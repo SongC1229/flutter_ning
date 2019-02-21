@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'config.dart';
 import 'dialog_alterCourse.dart';
@@ -12,13 +14,6 @@ class _CoursePageState extends State<CoursePage>{
   @override
   void initState() {
     super.initState();
-//    initCourse(refresh);
-  }
-
-  void refresh(){
-    setState(() {
-    }
-    );
   }
 
   @override
@@ -125,6 +120,8 @@ class _CoursePageState extends State<CoursePage>{
   }
 
   Widget _buildItem(int row,int col){
+
+
     String courseName='';
     String classSite='';
     String className='';
@@ -155,7 +152,7 @@ class _CoursePageState extends State<CoursePage>{
               child: Text("$courseName\n$classSite\n$className",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 12),),
               decoration: new BoxDecoration(
                   borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
-                  color:courseName+classSite==""?Colors.transparent:Config.itemColors[col]
+                  color:courseName+classSite==""?Colors.transparent:Config.itemColors[Random().nextInt(Config.itemColors.length)]
               ),
             ),
         )

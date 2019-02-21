@@ -65,6 +65,13 @@ class _AddClassPageState extends State<AddClassPage> {
     classRoom.sum=sum;
     //更新
     if(classRoom.id!=null){
+      //更新课程表
+      GlobalData.courseList.forEach((course){
+        if(course["classID"]==classRoom.id){
+          course["className"]=classRoom.name;
+        }
+      });
+      GlobalData.updateCourseToFile();
       classRoomProvider.update(classRoom);
       print("update classroom success");
       _students.forEach((student) {
