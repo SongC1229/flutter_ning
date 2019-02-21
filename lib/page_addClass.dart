@@ -95,61 +95,45 @@ class _AddClassPageState extends State<AddClassPage> {
     }
   }
 
-  void _onWillPop(){
+  Future<bool> _onWillPop() {
     if(widget.refreshManage!=null){
       widget.refreshManage();
     }
     if(classRoom.id!=null){
-      Navigator.of(context).pop(false);
-    }
-    else showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-          contentPadding: EdgeInsets.only(left: 10),
-          title: new Text("退出",style: TextStyle(fontSize: 18),),
-          content: new SingleChildScrollView(
-            padding: EdgeInsets.all(15),
-            child: new ListBody(
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(bottom: 5),
-                  color:Colors.grey,
-                  height: 1.5,
-                ),
-                new Text('尚未保存班级信息\n'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text('直接退出'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-            new FlatButton(
-              child: new Text('继续编辑'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-
-          ],
-        );
-      },
-    ).then((val) {
-      if(val==null)
-        val=false;
-      if (val){
-        //直接退出
         Navigator.of(context).pop(false);
-      }else{
-        print('jiaxu');
-      }
-    });
+        return Future.value(true);
+    }
+    return showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        contentPadding: EdgeInsets.only(left: 10),
+        title: new Text("退出",style: TextStyle(fontSize: 18),),
+        content: new SingleChildScrollView(
+          padding: EdgeInsets.all(15),
+          child: new ListBody(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(bottom: 5),
+                color:Colors.grey,
+                height: 1.5,
+              ),
+              new Text('尚未保存班级信息\n'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: new Text('直接退出'),
+          ),
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('继续编辑'),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
 
@@ -169,9 +153,7 @@ class _AddClassPageState extends State<AddClassPage> {
     conList.add(bottom);
     return
       WillPopScope(
-        onWillPop: (){
-         _onWillPop();
-        },
+        onWillPop:_onWillPop,
         child:Scaffold(
         appBar: PreferredSize(
               preferredSize: Size.fromHeight(45.0),

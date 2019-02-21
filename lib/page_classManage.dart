@@ -18,6 +18,7 @@ class _ClassManagePageState extends State<ClassManagePage> {
     classRoomProvider.open().whenComplete(() {
       classRoomProvider.getAll().then((lists) {
         setState(() {
+          if(lists!=null)
           lists.forEach((e) {
             crmList.add(e);
           });
@@ -26,10 +27,11 @@ class _ClassManagePageState extends State<ClassManagePage> {
     });
   }
 
-  void _refresh() {
+  void _getClassRooms() {
     crmList.clear();
     classRoomProvider.getAll().then((lists) {
       setState(() {
+        if(lists!=null)
         lists.forEach((e) {
           crmList.add(e);
         });
@@ -53,7 +55,7 @@ class _ClassManagePageState extends State<ClassManagePage> {
                           context: context,
                           barrierDismissible: false,
                           builder: (BuildContext context) {
-                            return AddClassPage(refreshManage: _refresh,);
+                            return AddClassPage(refreshManage: _getClassRooms,);
                           });
                     }
                 )
@@ -133,12 +135,13 @@ class _ClassManagePageState extends State<ClassManagePage> {
                                 e['classId']=-1;
                                 e['courseName']='';
                                 e['classSite']='';
+                                e['className']='';
                               }
                             });
                             updateCourseToFile();
                             //删除班级
                             classRoomProvider.delete(crm.id).whenComplete(() {
-                              _refresh();
+                              _getClassRooms();
                             });
                           }
                         }

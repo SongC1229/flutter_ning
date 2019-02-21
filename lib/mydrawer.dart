@@ -3,8 +3,8 @@ import 'config.dart';
 import 'page_course.dart';
 import 'page_classManage.dart';
 class MyDrawer extends StatefulWidget {
-  MyDrawer({@required this.refreshMain});
-  final refreshMain;
+  MyDrawer({this.refreshApp});
+  final refreshApp;
 
   @override
   _MyDrawerState createState() => new _MyDrawerState();
@@ -166,7 +166,9 @@ class _MyDrawerState extends State<MyDrawer> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return  ClassManagePage();
-        });
+        }).whenComplete((){
+      widget.refreshApp();
+    });
   }
 
   void _aboutPage() {
@@ -184,7 +186,9 @@ class _MyDrawerState extends State<MyDrawer> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return CoursePage();
-        });
+        }).whenComplete((){
+      widget.refreshApp();
+    });
   }
 
   void setMotto() {

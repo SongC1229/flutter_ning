@@ -20,6 +20,7 @@ class _CourseDialogState extends State<CourseDialog>{
     classRoomProvider.open().whenComplete(() {
       classRoomProvider.getAll().then((lists) {
         setState(() {
+          if(lists!=null)
           lists.forEach((e) {
             crmList.add(e);
           });
@@ -31,15 +32,28 @@ class _CourseDialogState extends State<CourseDialog>{
   void _updateCourse(int index,int classId,String courseName){
 
     setState(() {
+      bool havaId=false;
       crmList.forEach((e){
         if(e.id==classId){
+          havaId=true;
+          print(Config.courseList);
           //更新文件
           Config.courseList[index]['courseName']=courseName;
           Config.courseList[index]['classSite']=e.site;
+          Config.courseList[index]['className']=e.name;
           Config.courseList[index]['classId']=classId;
           updateCourseToFile();
         }
       });
+      if(!havaId){
+        print("sffd");
+        Config.courseList[index]['courseName']='';
+        Config.courseList[index]['classSite']='';
+        Config.courseList[index]['className']='';
+        Config.courseList[index]['classId']=-1;
+        print(Config.courseList);
+        updateCourseToFile();
+      }
 
     });
   }

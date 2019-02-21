@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'config.dart';
 import 'dbHelper.dart';
-import 'main.dart';
+import 'mydrawer.dart';
 
 class SignPage extends StatefulWidget {
+  
+  SignPage({this.refreshApp});
+  final refreshApp;
+  
   @override
   _SignPageState createState() => new _SignPageState();
 }
@@ -12,57 +16,85 @@ class _SignPageState extends State<SignPage>{
 
   ClassRoomProvider classRoomProvider=ClassRoomProvider();
   StudentProvider studentProvider=StudentProvider();
-  int classId=1;
-  String className='';
-  String courseName='';
+
+  //课程列
+  int _todayWeekCol;
+  //课程行
+  int _currentClassRow=-1;
+
+  String tableTop='';
   List<Student> _students=[];
+  List<int> todayCourses=[];
 
+  bool isRefreshCourse=false;
 
+  Widget _drawer;
   @override
   void initState() {
     super.initState();
     classRoomProvider.open().whenComplete((){
-      classRoomProvider.getMaxId().then((result){
-        classId=result;
-        classRoomProvider.getClassRoom(classId).then((cr){
-          setState(() {
-            className=cr.name;
-            courseName="数学";
-          });
-        });
-        studentProvider.open(classRoomProvider.db).whenComplete((){
-          studentProvider.getAll(classId).then((list){
+      studentProvider.open(classRoomProvider.db).whenComplete((){
+        initCourse(refreshCourses);
+      });
+    });
+    _drawer=MyDrawer(refreshApp: widget.refreshApp);
+    DateTime now = new DateTime.now();
+    int year =now.year;
+    int month=now.month;
+    int day =now.day;
+    _todayWeekCol=getWeek(year,month,day)-1;
+  }
+
+  void getStudents(){
+    if(_currentClassRow<1)
+      return;
+    int classID=Config.courseList[(_currentClassRow-1)*5+_todayWeekCol]["classId"];
+    if(classID>0)
+    studentProvider.getAll(classID).then((list){
             setState(() {
+              _students.clear();
+              if(list!=null)
               list.forEach((e){
                 _students.add(e);
               });
             });
           });
-        });
-      });
+  }
 
+  void refreshCourses(){
+    todayCourses.clear();
+    setState(() {
+      //当前应该显示节次
+      int row=analysisCount(DateTime.now().hour);
+      for(int i=8;i>0;i--){
+        if(Config.courseList[(i-1)*5+_todayWeekCol]["classId"]!=-1){
+          todayCourses.insert(0,i);
+          if(i>=row){
+            _currentClassRow=i;
+          }
+        }
+      }
+      if(todayCourses.isNotEmpty&&_currentClassRow==-1){
+        _currentClassRow=todayCourses.first;
+      }
+      getStudents();
     });
-    
   }
 
-  int analysisCount(int hour,int min){
-    switch(hour){
-      case 17:return 9;break;
-      case 16:return 8;break;
-      case 15:return 7;break;
-      case 14:return 6;break;
-      case 13:return 5;break;
-      case 12:return 5;break;
-      case 11:return 4;break;
-      case 10:return 3;break;
-      case 9:return 2;break;
-      case 8:return 1;break;
-      default:return 1;
-    }
+  //刷新节次和花名册
+  void _select(int choice) {
+    isRefreshCourse=false;
+    getStudents();
+    setState(() {
+      _currentClassRow=choice;
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
+//    if(Config.courseList!=null&&Config.courseList.length==40&&isRefreshCourse)
+//      refreshCourses();
     List<Widget> conList=_students.map((student) {
       return _buildItem(context,student);
     }).toList();
@@ -71,11 +103,18 @@ class _SignPageState extends State<SignPage>{
     int year =now.year;
     int month=now.month;
     int day =now.day;
-    int hour=now.hour;
-    int min=now.minute;
-    int count=analysisCount(hour,min);
+    String courseName='';
+    String className='';
+    String classNumString='无课';
+    if(_currentClassRow>0){
+      className=Config.courseList[(_currentClassRow-1)*5+_todayWeekCol]["className"];
+      courseName=Config.courseList[(_currentClassRow-1)*5+_todayWeekCol]["courseName"];
+      classNumString="第$_currentClassRow节";
+    }
+    tableTop="$year 年 $month 月 $day 號 $classNumString\n$className $courseName";
     return
       Scaffold(
+        drawer: _drawer,
         appBar: PreferredSize(
             preferredSize: Size.fromHeight(45.0),
             child:
@@ -85,9 +124,53 @@ class _SignPageState extends State<SignPage>{
                 titleSpacing: 20,
                 title: Text(Config.barCate[0],style: new TextStyle(fontFamily: Config.font,)),
                 actions: <Widget>[
-                  // action button
-                  TopIcon(cate: 0),
-                ]
+                  // overflow menu
+                  PopupMenuButton<int>(
+                  child: Row(
+                  children: <Widget>[
+                  Icon(Icons.arrow_drop_down),
+                  Text(_currentClassRow==-1?'无课':"第$_currentClassRow节",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.normal,
+                        letterSpacing: 5.0,
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.only(right: 20),)
+                  ],
+                  ),
+                  onSelected: _select,
+                  itemBuilder: (BuildContext context) {
+                    if(todayCourses.isEmpty){
+                      return [PopupMenuItem<int>(
+                        value: -1,
+                        child: Text("无课",
+                          style:TextStyle(
+                            color: Colors.lightBlue,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.normal,
+                            letterSpacing: 5.0,
+                          ),
+                        ),
+                      )];
+                    }
+                    return todayCourses.map((int row) {
+                      return PopupMenuItem<int>(
+                        value: row,
+                        child: Text("第$row节",
+                          style:TextStyle(
+                              color: Colors.lightBlue,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.normal,
+                              letterSpacing: 5.0,
+                          ),
+                        ),
+                      );
+                    }).toList();
+                  },
+            ),
+          ],
             )
         ),
         backgroundColor: Config.appBackground,
@@ -95,7 +178,7 @@ class _SignPageState extends State<SignPage>{
           slivers: <Widget>[
               SliverAppBar(
                 elevation: 1,
-                backgroundColor: Config.appBackground,
+                backgroundColor: Config.itemColors[0],
                 primary: false,
                 flexibleSpace: Container(
                   decoration: BoxDecoration(
@@ -104,14 +187,9 @@ class _SignPageState extends State<SignPage>{
                         fit: BoxFit.cover
                     ),
                   ),
-                  margin: EdgeInsets.only(bottom: 5,top: 5),
-                  child:Card(
-                    margin: EdgeInsets.all(0),
-                    color: Config.itemColors[0],
-                    elevation: 2,
-                    child:Text("$year 年 $month 月 $day 號 第 $count 节 \n某班级 某课程",style: TextStyle(fontSize: 16),textAlign: TextAlign.center,),
-                  ),
-                 height: 50,
+                  padding: EdgeInsets.only(bottom: 5,top: 8),
+                  child:Text(tableTop,style: TextStyle(fontSize: 16),textAlign: TextAlign.center,),
+                 height: 66,
                 ),
                 bottom:_buildTabTop() ,
                 floating: false,
@@ -276,4 +354,21 @@ class _SignPageState extends State<SignPage>{
       )
       );
   }
+
+  int analysisCount(int hour){
+    switch(hour){
+      case 16:return 8;
+      case 15:return 7;
+      case 14:return 6;
+      case 13:
+      case 12:return 5;
+      case 11:return 4;
+      case 10:return 3;
+      case 9:return 2;
+      case 8:return 1;
+      default:return 1;
+    }
+  }
+
+
 }

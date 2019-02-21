@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Config {
-  static Color topBkg=Color(0xFFF2F2F2);
-  static Color light=Color(0xFFD6D5B7);
   static bool dark = false;
   static ThemeData themeData = new ThemeData(primarySwatch:Colors.blue);
   static String font="方正楷体";
@@ -20,20 +18,22 @@ class Config {
   static List<String> courseTime=['一\n8:10～9:00','二\n9:10～10:00','三\n10:10～11:00',
                                   '四\n11:10～12:00','五\n13:10～14:00','六\n14:10～15:00',
                                   '七\n15:10～16:00','八\n16:10～17:00'];
+  static bool isWrite=false;
   static String docDir;
   static List<Map> courseList=[];
 }
 
-void initCourse( Function refreshApp) async{
+void initCourse(Function refreshApp) async{
+  if(Config.courseList!=null&&Config.courseList.length==40)
+    return;
   if(Config.docDir==null){
      Config.docDir = (await getApplicationDocumentsDirectory()).path;
   }
   var coursePath=Config.docDir+"/course.json";
   bool courseExist=FileSystemEntity.isFileSync(coursePath);
   if(!courseExist){
-    Map<String,dynamic> initCourse={"classId":-1,"classSite":"","courseName":""};
     for (int i=0;i<40;i++){
-      Config.courseList.add(initCourse);
+      Config.courseList.add({"classId":-1,"classSite":"","className":"","courseName":""});
     }
     print("新建course.json");
     JsonEncoder encoder=new JsonEncoder();
@@ -64,8 +64,27 @@ void updateCourseToFile() async{
     Config.docDir = (await getApplicationDocumentsDirectory()).path;
   }
   var coursePath=Config.docDir+"/course.json";
-  print("更新course.json");
-  JsonEncoder encoder=new JsonEncoder();
-  String jsonString=encoder.convert(Config.courseList);
-  new File(coursePath).writeAsString(jsonString);
+  if(!Config.isWrite){
+    Config.isWrite=true;
+    print("更新course.json");
+    JsonEncoder encoder=new JsonEncoder();
+    String jsonString=encoder.convert(Config.courseList);
+    new File(coursePath).writeAsString(jsonString).whenComplete((){
+      Config.isWrite=false;
+    });
+  }
+  else{
+    print(new DateTime.now().second);
+    sleep(Duration(seconds: 1));
+    updateCourseToFile();
+    print(new DateTime.now().second);
+  }
+}
+
+int getWeek(int year,int month,int day){
+  if(month==1||month==2){
+    year-=1;
+    month+=12;
+  }
+  return (day+2*month+3*(month+1)~/5+year+year~/4-year~/100+year~/400+1)%7;
 }

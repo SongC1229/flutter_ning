@@ -5,8 +5,6 @@ import 'page_home.dart';
 import 'page_note.dart';
 import 'page_grade.dart';
 import 'page_sign.dart';
-import 'mydrawer.dart';
-import 'page_addClass.dart';
 void main() => runApp(Home());
 
 class Home extends StatefulWidget {
@@ -20,14 +18,13 @@ class _HomeState extends State<Home>{
   int _currentIndex = 1;
   Widget _pages;
   Widget _tabBar;
-  Widget _drawer;
 
 
   void initWidget(){
     _pages =  IndexedStack(
       children: <Widget>[
-        SignPage(),
-        ClassPage(),
+        SignPage(refreshApp:refreshApp),
+        ClassPage(refreshApp: refreshApp),
         GradePage(),
         NotePage()
       ],
@@ -76,45 +73,16 @@ class _HomeState extends State<Home>{
   }
 
   @override
-  void initState() {
-    super.initState();
-      _drawer=MyDrawer(refreshMain: null);
-  }
-
-  @override
   Widget build(BuildContext context) {
     initWidget();
     return  MaterialApp(
       theme: Config.themeData,
       home: Scaffold(
-        drawer: _drawer,
         body: _pages,
         bottomNavigationBar: _tabBar,
         backgroundColor: Config.appBackground,
       ),
     );
 
-  }
-}
-
-class TopIcon extends StatelessWidget {
-  TopIcon({@required this.cate});
-  final cate;
-  @override
-  Widget build(BuildContext context) {
-    Widget icon;
-    icon=Icon(Icons.add,color:Config.itemColors[cate],);
-    return  IconButton(
-      icon: icon,
-      highlightColor: Colors.transparent,
-      onPressed: () {
-        showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return AddClassPage();
-            });
-      },
-    );
   }
 }

@@ -1,7 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'config.dart';
-import 'main.dart';
+import 'page_addClass.dart';
+import 'mydrawer.dart';
+
 class ClassPage extends StatefulWidget {
+
+  ClassPage({@required this.refreshApp});
+  final refreshApp;
   @override
   _ClassPageState createState() => new _ClassPageState();
 }
@@ -14,15 +21,37 @@ class _ClassPageState extends State<ClassPage>{
   int groupNum=2;
   int groupRandom=0;
   int week=0;
+  String temp="15";
+  String tag="晴";
+  Widget _drawer;
+
   @override
   void initState() {
     super.initState();
-    week=getWeek();
+    _drawer=MyDrawer();
+    DateTime now = new DateTime.now();
+    int year =now.year;
+    int month=now.month;
+    int day =now.day;
+    week=getWeek(year,month,day);
+    var url = "http://wthrcdn.etouch.cn/weather_mini?city=台中";
+    http.readBytes(url).then((repo){
+      String rePo=utf8.decode(repo);
+      JsonDecoder jsonDecoder=new JsonDecoder();
+      Map<String, dynamic> res=jsonDecoder.convert(rePo);
+      Map<String, dynamic> data=res["data"];
+      List<dynamic> tags=data["forecast"];
+      tag=tags[0]["type"];
+      temp=data["wendu"];
+      setState(() {
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _drawer,
       appBar:
       PreferredSize(
           preferredSize: Size.fromHeight(45.0),
@@ -34,7 +63,18 @@ class _ClassPageState extends State<ClassPage>{
               title: Text(Config.barCate[1],style: new TextStyle(fontFamily: Config.font,)),
               actions: <Widget>[
                 // action button
-                TopIcon(cate: 0),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  highlightColor: Colors.transparent,
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return AddClassPage();
+                        });
+                  },
+                )
               ]
           )
       ),
@@ -96,10 +136,10 @@ class _ClassPageState extends State<ClassPage>{
               child: Text(classRoom+"    总人数：$all人\n应到：$should      已到：$sign",textAlign: TextAlign.start,),
               flex: 2,
             ),
-            Text("臺中\n10.5'C"),
+            Text("臺中\n$temp℃"),
             Expanded(
               child:IconButton(
-                  icon: Icon(Icons.wb_sunny,size: 40,color: Colors.yellow,),
+                  icon:_buildIcon(),
                   onPressed: () {
                   },
                 ),
@@ -111,6 +151,18 @@ class _ClassPageState extends State<ClassPage>{
         ],
       ),
     );
+  }
+
+  Icon _buildIcon(){
+    switch(tag){
+      case "晴":return Icon(Icons.wb_sunny,size: 40,color: Colors.yellow,);
+      case "阴":return Icon(Icons.wb_cloudy,size: 40,color: Colors.grey,);
+      case "多云":return Icon(Icons.wb_cloudy,size: 40,color: Colors.white,);
+      case "中雨":
+      case "大雨":
+      case "小雨":return Icon(Icons.cloud_queue,size: 40,color: Colors.yellow,);
+    }
+    return Icon(Icons.wb_sunny,size: 40,color: Colors.yellow,);
   }
 
   Widget _buildCourseList(int index,String username){
@@ -459,19 +511,4 @@ class _ClassPageState extends State<ClassPage>{
     return items;
   }
 
-}
-
-int getWeek(){
-  DateTime now = new DateTime.now();
-  int year =now.year;
-  int month=now.month;
-  int day =now.day;
-  int week=1;
-  if(month==1||month==2){
-    year-=1;
-    month+=12;
-  }
-  week=(day+2*month+3*(month+1)~/5+year+year~/4-year~/100+year~/400+1)%7;
-  print("$week");
-  return week;
 }
