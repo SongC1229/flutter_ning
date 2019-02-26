@@ -154,7 +154,8 @@ class Student {
   String name;
   int sex ;     //0女 1 男
   int average;  //平均分
-
+  bool notAbsence=true;
+  bool notLeave=true;
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -191,7 +192,7 @@ class Student {
 class StudentProvider {
   Database db;
 
-  Future open(Database database) async {
+  void open(Database database){
     db=database;
   }
 
@@ -244,7 +245,6 @@ class StudentProvider {
   Future close() async => db.close();
 }
 
-
 class Roster {
   int dateId;
   int classId;
@@ -295,11 +295,18 @@ class Roster {
 class RosterProvider {
   Database db;
 
-  Future open(Database database) async {
+  void open(Database database){
     db=database;
   }
 
   Future<Roster> insert(Roster roster) async {
+    Roster temp;
+    temp=await getRoster(roster.dateId);
+    if(temp!=null)
+    {
+      print("Roster exist");
+      return temp;
+    }
     roster.dateId = await db.insert(tableRoster, roster.toMap());
     return roster;
   }

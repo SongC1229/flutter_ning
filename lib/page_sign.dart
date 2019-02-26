@@ -21,7 +21,7 @@ class _SignPageState extends State<SignPage>{
   void initState() {
     super.initState();
     _drawer=MyDrawer(refreshApp: widget.refreshApp);
-    GlobalData.initGlobalData().whenComplete((){
+    DataProvider.initData().whenComplete((){
       setState(() {
       });
     });
@@ -30,45 +30,41 @@ class _SignPageState extends State<SignPage>{
   //刷新节次和花名册
   void _select(int choice) {
     setState(() {
-      GlobalData.shouldClassRow=choice;
-      GlobalData.getShouldStudents().whenComplete((){
-        setState(() {
-        });
+      DataProvider.showCourseRow=choice;
+      DataProvider.getShowStudentsAndInitRoster().whenComplete((){
+          setState(() {
+          });
       });
     });
   }
 
   void refreshInfo()async{
-    GlobalData.coursesChange=false;
-    GlobalData.initTodayCourse();
-    GlobalData.getShouldStudents().whenComplete((){
+    DataProvider.coursesChange=false;
+    DataProvider.initTodayCourse();
+    DataProvider.getShowStudentsAndInitRoster().whenComplete((){
       setState(() {
       });
     });
-  }
+    }
 
   @override
   Widget build(BuildContext context) {
     //如果课程信息变动，刷新当天信息
-    if(GlobalData.coursesChange)
+    if(DataProvider.coursesChange)
       refreshInfo();
-    List<Widget> conList=GlobalData.shouldStudents.map((student) {
+    List<Widget> conList=DataProvider.showStudents.map((student) {
       return _buildItem(context,student);
     }).toList();
     conList.add(Container(height: 50,));
-    DateTime now = new DateTime.now();
-    int year =now.year;
-    int month=now.month;
-    int day =now.day;
     String courseName='';
     String className='';
     String classNumString='无课';
-    if(GlobalData.shouldClassRow>0){
-      className=GlobalData.courseList[(GlobalData.shouldClassRow-1)*5+GlobalData.todayWeek-1]["className"];
-      courseName=GlobalData.courseList[(GlobalData.shouldClassRow-1)*5+GlobalData.todayWeek-1]["courseName"];
-      classNumString="第"+GlobalData.shouldClassRow.toString()+"节";
+    if(DataProvider.showCourseRow>0){
+      className=DataProvider.courseList[(DataProvider.showCourseRow-1)*5+DataProvider.todayWeek-1]["className"];
+      courseName=DataProvider.courseList[(DataProvider.showCourseRow-1)*5+DataProvider.todayWeek-1]["courseName"];
+      classNumString="第"+DataProvider.showCourseRow.toString()+"节";
     }
-    tableTop="$year 年 $month 月 $day 號 $classNumString\n$className $courseName";
+    tableTop=DataProvider.year.toString()+" 年 "+DataProvider.month.toString()+" 月 "+DataProvider.day.toString()+" 號 $classNumString\n$className $courseName";
     return
       Scaffold(
         drawer: _drawer,
@@ -86,7 +82,7 @@ class _SignPageState extends State<SignPage>{
                   child: Row(
                   children: <Widget>[
                   Icon(Icons.arrow_drop_down),
-                  Text(GlobalData.shouldClassRow==-1?'无课':classNumString,
+                  Text(DataProvider.showCourseRow==-1?'无课':classNumString,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18.0,
@@ -99,7 +95,7 @@ class _SignPageState extends State<SignPage>{
                   ),
                   onSelected: _select,
                   itemBuilder: (BuildContext context) {
-                    if(GlobalData.todayCourseList.isEmpty){
+                    if(DataProvider.todayCourseList.isEmpty){
                       return [PopupMenuItem<int>(
                         value: -1,
                         child: Text("无课",
@@ -112,7 +108,7 @@ class _SignPageState extends State<SignPage>{
                         ),
                       )];
                     }
-                    return GlobalData.todayCourseList.map((int row) {
+                    return DataProvider.todayCourseList.map((int row) {
                       return PopupMenuItem<int>(
                         value: row,
                         child: Text("第$row节",
@@ -205,24 +201,29 @@ class _SignPageState extends State<SignPage>{
           Padding(padding: EdgeInsets.only(left: 15),),
           Expanded(
             child:IconButton(
+              icon: Icon(Icons.filter_vintage,color: student.notLeave?Colors.grey[300]:Colors.blue),
+              highlightColor: Colors.transparent,
               onPressed: (){
                 setState(() {
-
+                  student.notLeave=!student.notLeave;
+                  student.notAbsence=student.notLeave;
+                  DataProvider.updateRoster();
                 });
               },
-              icon: Icon(Icons.home,color: Colors.grey[300],),
             ),
             flex: 2,
           ),
           Padding(padding: EdgeInsets.only(left: 15),),
           Expanded(
             child:IconButton(
+              icon: Icon(Icons.bookmark,color:student.notAbsence?Colors.grey[300]:Colors.red),
+              highlightColor: Colors.transparent,
               onPressed: (){
                 setState(() {
+                  student.notAbsence=!student.notAbsence;
+                  DataProvider.updateRoster();
                 });
               },
-              highlightColor: Colors.transparent,
-              icon: Icon(Icons.favorite_border,color: Colors.red,),
             ),
             flex: 2,
           ),

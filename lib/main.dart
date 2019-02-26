@@ -39,7 +39,7 @@ class _HomeState extends State<Home>{
           title: Text(Config.barCate[0],style: TextStyle(fontFamily:Config.font,fontSize: 14.0),),
         ),
         new BottomNavigationBarItem(
-          icon:  Icon(Icons.home,size: 23.0),
+          icon:  Icon(Icons.camera,size: 23.0),
           title: Text(Config.barCate[1],style: TextStyle(fontFamily: Config.font,fontSize: 14.0),),
 
         ),

@@ -18,23 +18,31 @@ class _ClassPageState extends State<ClassPage>{
   int selectSex=2;
   int randomTrue=0;
   int selectNum=1;
+
   int groupNum=2;
   int groupRandom=0;
+
   int week=0;
+
   String temp="15";
   String tag="晴";
   Widget _drawer;
+
+  //welcome
+  int all =0;
+  int should=0;
+  int sign=0;
+  String classRoom="无课";
+  //courseList
+  int courseLength=0;
 
   @override
   void initState() {
     super.initState();
     _drawer=MyDrawer();
-    if(GlobalData.todayWeek==-1){
+    if(DataProvider.todayWeek==-1){
       DateTime now = new DateTime.now();
-      int year =now.year;
-      int month=now.month;
-      int day =now.day;
-      week=GlobalData.getWeek(year,month,day);
+      week=now.weekday;
     }
     var url = "http://wthrcdn.etouch.cn/weather_mini?city=台中";
     http.readBytes(url).then((repo){
@@ -52,6 +60,27 @@ class _ClassPageState extends State<ClassPage>{
 
   @override
   Widget build(BuildContext context) {
+    if(DataProvider.refreshHome){
+      classRoom=DataProvider.courseList[(DataProvider.showCourseRow-1)*5+DataProvider.todayWeek-1]["className"];
+      print("Refresh home");
+      all=DataProvider.showStudents.length;
+      should=all;
+      sign=all;
+      int allLeave=0;
+      int allAbsence=0;
+      DataProvider.showStudents.forEach((e){
+        if(!e.notLeave)//请假时应到人数减一
+          allLeave+=1;
+        if(!e.notAbsence)
+          allAbsence+=1;
+      });
+      should=all-allLeave;
+      sign=all-allAbsence;
+      courseLength=DataProvider.courseList.length;
+      DataProvider.refreshHome=false;
+    }
+
+
     return Scaffold(
       drawer: _drawer,
       appBar:
@@ -93,14 +122,6 @@ class _ClassPageState extends State<ClassPage>{
   }
 
   Widget _buildWelcome(int index,String username){
-    String classRoom="高二（3）班";
-    int all =60;
-    int should=55;
-    int sign=52;
-    DateTime now = new DateTime.now();
-    int year =now.year;
-    int month=now.month;
-    int day =now.day;
     return  Card(
       clipBehavior: Clip.antiAlias,
       color: Config.itemColors[index],
@@ -117,7 +138,7 @@ class _ClassPageState extends State<ClassPage>{
           Row(children: <Widget>[
             Padding(padding: EdgeInsets.only(left: 25)),
             Expanded(
-              child: Text("$year 年 $month 月 $day 號 ",style: TextStyle(fontSize: 16),textAlign: TextAlign.start,),
+              child: Text(DataProvider.year.toString()+" 年 "+DataProvider.month.toString()+" 月 "+DataProvider.day.toString()+" 號",style: TextStyle(fontSize: 16),textAlign: TextAlign.start,),
               flex: 2,
             ),
             Expanded(
@@ -162,7 +183,7 @@ class _ClassPageState extends State<ClassPage>{
       case "多云":return Icon(Icons.wb_cloudy,size: 40,color: Colors.white,);
       case "中雨":
       case "大雨":
-      case "小雨":return Icon(Icons.cloud_queue,size: 40,color: Colors.yellow,);
+      case "小雨":return Icon(Icons.add,size: 40,color: Colors.yellow,);
     }
     return Icon(Icons.wb_sunny,size: 40,color: Colors.yellow,);
   }
@@ -189,7 +210,7 @@ class _ClassPageState extends State<ClassPage>{
               flex: 7,
             ),
             Expanded(
-                child: Text("今日：3节 剩余：2节",style: TextStyle(fontSize: 16),textAlign: TextAlign.left,),
+                child: Text("今日共：$courseLength节 ",style: TextStyle(fontSize: 16),textAlign: TextAlign.left,),
                 flex: 10),
             Padding(padding: EdgeInsets.only(right: 25))
           ]
@@ -291,7 +312,7 @@ class _ClassPageState extends State<ClassPage>{
                 alignedDropdown: true,
                 child: DropdownButtonHideUnderline(
                   child:DropdownButton(
-                    items: studentNum(2,10),
+                    items: selectNumberItem(2,10),
                     value: groupNum,//下拉菜单选择完之后显示给用户的值
                     onChanged: (T){//下拉菜单item点击之后的回调
                       setState(() {
@@ -463,7 +484,7 @@ class _ClassPageState extends State<ClassPage>{
                 alignedDropdown: true,
                 child: DropdownButtonHideUnderline(
                        child:DropdownButton(
-                        items: studentNum(1,52),
+                        items: selectNumberItem(1,all),
                         value: selectNum,//下拉菜单选择完之后显示给用户的值
                         onChanged: (T){//下拉菜单item点击之后的回调
                           setState(() {
@@ -500,13 +521,15 @@ class _ClassPageState extends State<ClassPage>{
     );
   }
 
-  List<DropdownMenuItem> studentNum(int start,int end){
+  List<DropdownMenuItem> selectNumberItem(int start,int end){
     List<DropdownMenuItem> items=new List();
-    int i=start;
-    for(;i<=end;i++){
+    if(start>end){
+      end=start;
+    }
+    for(;start<=end;start++){
       DropdownMenuItem dropdownMenuItem=new DropdownMenuItem(
-        child:new Text("$i",),
-        value: i,
+        child:new Text("$start",),
+        value: start,
       );
       items.add(dropdownMenuItem);
     }

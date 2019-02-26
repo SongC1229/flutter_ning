@@ -16,7 +16,7 @@ class _CourseDialogState extends State<CourseDialog>{
   @override
   void initState() {
     super.initState();
-      GlobalData.classRoomProvider.getAll().then((lists) {
+      DataProvider.classRoomProvider.getAll().then((lists) {
         setState(() {
           if(lists!=null)
           lists.forEach((e) {
@@ -35,21 +35,20 @@ class _CourseDialogState extends State<CourseDialog>{
           print('update this course');
           havaId=true;
           //更新文件
-          GlobalData.courseList[index]['courseName']=courseName;
-          GlobalData.courseList[index]['classSite']=e.site;
-          GlobalData.courseList[index]['className']=e.name;
-          GlobalData.courseList[index]['classId']=classId;
-          GlobalData.updateCourseToFile();
+          DataProvider.courseList[index]['courseName']=courseName;
+          DataProvider.courseList[index]['classSite']=e.site;
+          DataProvider.courseList[index]['className']=e.name;
+          DataProvider.courseList[index]['classId']=classId;
+          DataProvider.updateCourseToFile();
         }
       });
       if(!havaId){
         print("set this course empty");
-        GlobalData.courseList[index]['courseName']='';
-        GlobalData.courseList[index]['classSite']='';
-        GlobalData.courseList[index]['className']='';
-        GlobalData.courseList[index]['classId']=-1;
-        print(GlobalData.courseList);
-        GlobalData.updateCourseToFile();
+        DataProvider.courseList[index]['courseName']='';
+        DataProvider.courseList[index]['classSite']='';
+        DataProvider.courseList[index]['className']='';
+        DataProvider.courseList[index]['classId']=-1;
+        DataProvider.updateCourseToFile();
       }
 
     });

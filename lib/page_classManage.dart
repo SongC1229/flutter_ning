@@ -130,7 +130,7 @@ class _ClassManagePageState extends State<ClassManagePage> {
                             }).then((val) {
                           if (val == true){
                             //删除相关课程
-                            GlobalData.courseList.forEach((e){
+                            DataProvider.courseList.forEach((e){
                               if(e['classId']==crm.id){
                                 e['classId']=-1;
                                 e['courseName']='';
@@ -138,7 +138,7 @@ class _ClassManagePageState extends State<ClassManagePage> {
                                 e['className']='';
                               }
                             });
-                            GlobalData.updateCourseToFile();
+                            DataProvider.updateCourseToFile();
                             //删除班级
                             classRoomProvider.delete(crm.id).whenComplete(() {
                               _getClassRooms();

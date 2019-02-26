@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
-//import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+//import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'dbHelper.dart';
 
 class Config {
@@ -22,27 +22,36 @@ class Config {
   static List<String> weekDays=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
 }
 
-class GlobalData{
+class DataProvider{
 
   static ClassRoomProvider classRoomProvider=ClassRoomProvider();
   static StudentProvider studentProvider=StudentProvider();
+  static RosterProvider rosterProvider=RosterProvider();
 
   static bool isWrite=false;
+  static bool coursesChange=false;
+  static bool refreshHome=false;
   static String courseJsonPath;
   static List<Map> courseList=[];
   static List<int> todayCourseList=[];
-  static List<Student> shouldStudents=[];
-  static int shouldClassRow=-1;//可视的行
+  static List<Student> showStudents=[];
+  static int showCourseRow=-1;//可视的行,节次
+//  static int shouldCourseRow=-1;//可视的行,节次
+  static Roster showRoster;
+  static Roster shouldRoster;
   static int todayWeek=-1;//可视的星期
-  static bool coursesChange=false;
 
-  static int getWeek(int year,int month,int day){
-    if(month==1||month==2){
-      year-=1;
-      month+=12;
-    }
-    return (day+2*month+3*(month+1)~/5+year+year~/4-year~/100+year~/400+1)%7;
-  }
+  static int year =1970;
+  static int month=1;
+  static int day =1;
+
+//  static int getWeek(int year,int month,int day){
+//    if(month==1||month==2){
+//      year-=1;
+//      month+=12;
+//    }
+//    return (day+2*month+3*(month+1)~/5+year+year~/4-year~/100+year~/400+1)%7;
+//  }
 
   static int analysisNow(int hour){
     switch(hour){
@@ -58,10 +67,34 @@ class GlobalData{
       default:return 1;
     }
   }
-  
+
+  static void initTodayCourse(){
+    todayCourseList.clear();
+    //当前应该显示节次
+    DateTime now = new DateTime.now();
+    year =now.year;
+    month=now.month;
+    day =now.day;
+    int row=analysisNow(now.hour);
+
+    todayWeek=now.weekday;
+    for(int i=8;i>0;i--){
+      if(courseList[(i-1)*5+todayWeek-1]["classId"]!=-1){
+        todayCourseList.insert(0,i);
+        if(i>=row){
+          showCourseRow=i;
+        }
+      }
+    }
+    if(todayCourseList.isNotEmpty&&showCourseRow==-1){
+      showCourseRow=todayCourseList.first;
+    }
+//    shouldCourseRow=showCourseRow;
+  }
+
   static Future initCourse() async{
     if(courseJsonPath==null){
-      courseJsonPath = (await getApplicationDocumentsDirectory()).path+"/course.json";
+      courseJsonPath = (await getDatabasesPath())+"/course.json";
     }
     bool courseExist=FileSystemEntity.isFileSync(courseJsonPath);
     if(!courseExist){
@@ -86,62 +119,9 @@ class GlobalData{
     }
   }
 
-  static void initTodayCourse(){
-    todayCourseList.clear();
-    //当前应该显示节次
-    DateTime now = new DateTime.now();
-    int year =now.year;
-    int month=now.month;
-    int day =now.day;
-    int row=analysisNow(now.hour);
-    todayWeek=getWeek(year,month,day);
-    for(int i=8;i>0;i--){
-      if(courseList[(i-1)*5+todayWeek-1]["classId"]!=-1){
-        todayCourseList.insert(0,i);
-        if(i>=row){
-          shouldClassRow=i;
-        }
-      }
-    }
-    if(todayCourseList.isNotEmpty&&shouldClassRow==-1){
-      shouldClassRow=todayCourseList.first;
-    }
-  }
-
-  static Future getShouldStudents() async{
-    if(shouldClassRow<1)
-      return;
-    int classID=courseList[(shouldClassRow-1)*5+todayWeek-1]["classId"];
-    if(classID>0)
-      await studentProvider.getAll(classID).then((list){
-        shouldStudents.clear();
-        if(list!=null)
-          list.forEach((e){
-            shouldStudents.add(e);
-          });
-      });
-  }
-
-  //初始化当天信息
-  static Future initGlobalData() async{
-    //读取json文件 初始化课程表
-    await initCourse().whenComplete(() async{
-      //初始化courseList完成
-      print("Load course finish");
-      initTodayCourse();
-      print("Init today course finish");
-      await classRoomProvider.open().whenComplete(() async{
-        await studentProvider.open(classRoomProvider.db);
-      });
-      print("Start database finish");
-      await getShouldStudents();
-      print("Get Should Students finish");
-    });
-  }
-
-  static void updateCourseToFile() async{
+  static Future updateCourseToFile() async{
     if(courseJsonPath==null){
-      courseJsonPath = (await getApplicationDocumentsDirectory()).path+"/course.json";
+      courseJsonPath = (await getDatabasesPath())+"/course.json";
     }
     if(!isWrite){
       isWrite=true;
@@ -149,16 +129,104 @@ class GlobalData{
       print("update course.json");
       JsonEncoder encoder=new JsonEncoder();
       String jsonString=encoder.convert(courseList);
-      File(courseJsonPath).writeAsString(jsonString).whenComplete((){
+      await File(courseJsonPath).writeAsString(jsonString).whenComplete((){
         isWrite=false;
       });
     }
     else{
       sleep(Duration(seconds: 1));
-      updateCourseToFile();
+      await updateCourseToFile();
     }
   }
-  
+
+  static Future getShowStudentsAndInitRoster() async{
+    if(showCourseRow<1)
+      return;
+    int classID=courseList[(showCourseRow-1)*5+todayWeek-1]["classId"];
+    if(classID>0)
+      await studentProvider.getAll(classID).then((list){
+        showStudents.clear();
+        if(list!=null)
+          list.forEach((e){
+            showStudents.add(e);
+          });
+      });
+    String className=courseList[(showCourseRow-1)*5+todayWeek-1]["className"];
+    int todayId=year*100000+month*1000+day*10+showCourseRow;
+    showRoster=Roster(
+      dateId: todayId,
+      classId: classID,
+      courseName: className,
+      sum: showStudents.length,
+      already: showStudents.length,
+      should: showStudents.length,
+      absence: '',
+      leave:'',
+    );
+    if(classID>0)
+    {
+      showRoster=await rosterProvider.insert(showRoster);
+    }
+    if(showRoster.absence!=''){
+      List<String> absence=showRoster.absence.split("#");
+      absence.forEach((e){
+        showStudents.forEach((s){
+          if(s.seatId.toString()==e)
+            s.notAbsence=false;
+        });
+//        print("缺勤:"+e);
+      });
+    }
+    if(showRoster.leave!=''){
+      List<String> leave=showRoster.leave.split("#");
+      leave.forEach((e){
+        showStudents.forEach((s){
+          if(s.seatId.toString()==e)
+            s.notLeave=false;
+        });
+//        print("请假:"+e);
+      });
+    }
+    refreshHome=true;
+  }
+
+  static Future updateRoster()async{
+    List<String> absence=[];
+    List<String> leave=[];
+    showStudents.forEach((s){
+      if(!s.notAbsence){//缺勤
+        absence.add(s.seatId.toString());
+      }
+      if(!s.notLeave){//请假
+        leave.add(s.seatId.toString());
+      }
+    });
+    showRoster.absence=absence.join('#');
+    showRoster.leave=leave.join('#');
+    rosterProvider.update(showRoster).whenComplete((){
+      print("Update roster finish");
+      refreshHome=true;
+    });
+  }
+
+  //初始化当天信息
+  static Future initData() async{
+    //读取json文件 初始化课程表
+    await initCourse().whenComplete(() async{
+      //初始化courseList完成
+      print("Load course finish");
+      initTodayCourse();
+      print("Init today course finish");
+      await classRoomProvider.open().whenComplete(() async{
+        studentProvider.open(classRoomProvider.db);
+        rosterProvider.open(classRoomProvider.db);
+      });
+      print("Start database finish");
+      await getShowStudentsAndInitRoster();
+      print("Get should students and init roster finish");
+    });
+  }
+
 }
 
 

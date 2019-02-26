@@ -11,22 +11,18 @@ class AddClassPage extends StatefulWidget {
 }
 
 class _AddClassPageState extends State<AddClassPage> {
-
-  ClassRoomProvider classRoomProvider=ClassRoomProvider();
-  StudentProvider studentProvider=StudentProvider();
+  
   ClassRoom classRoom=ClassRoom(id:null,name: '',site: '',sum: -1);
   List<Student> _students=[];
   String barTitle="添加班级";
   @override
   void initState() {
     super.initState();
-    classRoomProvider.open().whenComplete(() {
-      studentProvider.open(classRoomProvider.db).whenComplete(() {
         //更新班级
         if(widget.classroom!=null){
           classRoom=widget.classroom;
           barTitle='修改班级';
-          studentProvider.getAll(classRoom.id).then((list){
+          DataProvider.studentProvider.getAll(classRoom.id).then((list){
             setState(() {
               list.forEach((e){
                 _students.add(e);
@@ -42,9 +38,6 @@ class _AddClassPageState extends State<AddClassPage> {
             }
           });
         }
-      });
-    });
-
   }
 
 
@@ -66,18 +59,18 @@ class _AddClassPageState extends State<AddClassPage> {
     //更新
     if(classRoom.id!=null){
       //更新课程表
-      GlobalData.courseList.forEach((course){
+      DataProvider.courseList.forEach((course){
         if(course["classID"]==classRoom.id){
           course["className"]=classRoom.name;
         }
       });
-      GlobalData.updateCourseToFile();
-      classRoomProvider.update(classRoom);
+      DataProvider.updateCourseToFile();
+      DataProvider.classRoomProvider.update(classRoom);
       print("update classroom success");
       _students.forEach((student) {
         if (student.name != "") {
           student.classId = classRoom.id;
-          studentProvider.insert(student).then((s){
+          DataProvider.studentProvider.insert(student).then((s){
             student.id=s.id;
           });
         }
@@ -86,13 +79,13 @@ class _AddClassPageState extends State<AddClassPage> {
     }
     //新建班级
     else{
-      classRoomProvider.insert(classRoom).then((cr) {
+      DataProvider.classRoomProvider.insert(classRoom).then((cr) {
         print("insert classroom success");
         classRoom.id=cr.id;
         _students.forEach((student) {
           if (student.name != "") {
             student.classId = cr.id;
-            studentProvider.insert(student).then((s){
+            DataProvider.studentProvider.insert(student).then((s){
               student.id=s.id;
             });
           }
@@ -107,7 +100,7 @@ class _AddClassPageState extends State<AddClassPage> {
       widget.refreshManage();
     }
     if(classRoom.id!=null){
-        Navigator.of(context).pop(false);
+//        Navigator.of(context).pop(false);
         return Future.value(true);
     }
     return showDialog(
@@ -305,7 +298,7 @@ class _AddClassPageState extends State<AddClassPage> {
                 setState(() {
                   _students.remove(student);
                   if(student.id!=null)
-                    studentProvider.delete(student.id);
+                    DataProvider.studentProvider.delete(student.id);
                 });
               },
               icon: Icon(Icons.delete,color: Colors.blue,),

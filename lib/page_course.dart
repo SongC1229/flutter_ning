@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'config.dart';
 import 'dialog_alterCourse.dart';
@@ -125,10 +124,10 @@ class _CoursePageState extends State<CoursePage>{
     String courseName='';
     String classSite='';
     String className='';
-    if(GlobalData.courseList.length==40) {
-      classSite = GlobalData.courseList[row * 5 + col]["classSite"];
-      courseName = GlobalData.courseList[row * 5 + col]["courseName"];
-      className = GlobalData.courseList[row * 5 + col]["className"];
+    if(DataProvider.courseList.length==40) {
+      classSite = DataProvider.courseList[row * 5 + col]["classSite"];
+      courseName = DataProvider.courseList[row * 5 + col]["courseName"];
+      className = DataProvider.courseList[row * 5 + col]["className"];
     }
     return
           Expanded(
