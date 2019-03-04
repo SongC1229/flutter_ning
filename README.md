@@ -4,7 +4,7 @@
 |![主页](https://github.com/Sningi/flutter_ning/blob/master/show/home.jpg)|![花名册](https://github.com/Sningi/flutter_ning/blob/master/show/sign.jpg)|
 ## 2、班级管理
 |班级列表|班级信息|
-|:---|:---|:---|
+|:---|:---|
 |![班级列表](https://github.com/Sningi/flutter_ning/blob/master/show/classList.jpg)|![班级信息](https://github.com/Sningi/flutter_ning/blob/master/show/alterRoom.jpg)|
 ## 3、课程表
 |课表|便笺|
