@@ -1,16 +1,13 @@
-# flutter_ning
-
-A new Flutter application.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## 1、主页
+|主页|花名册|
+|:---|:---|
+|![主页](https://github.com/Sningi/flutter_ning/blob/master/show/home.jpg)|![花名册](https://github.com/Sningi/flutter_ning/blob/master/show/sign.jpg)|
+## 2、班级管理
+|班级列表|班级信息|
+|:---|:---|:---|
+|![班级列表](https://github.com/Sningi/flutter_ning/blob/master/show/classList.jpg)|![班级信息](https://github.com/Sningi/flutter_ning/blob/master/show/alterRoom.jpg)|
+## 3、课程表
+|课表|便笺|
+|:---|:---|
+|![课表](https://github.com/Sningi/flutter_ning/blob/master/show/courseTable.jpg)|![便笺](https://github.com/Sningi/flutter_ning/blob/master/show/note.jpg)|
+### 5、联系方式：17739458175

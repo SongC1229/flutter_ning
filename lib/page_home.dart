@@ -76,7 +76,7 @@ class _ClassPageState extends State<ClassPage>{
       });
       should=all-allLeave;
       sign=all-allAbsence;
-      courseLength=DataProvider.courseList.length;
+      courseLength=DataProvider.todayCourseList.length;
       DataProvider.refreshHome=false;
     }
 
@@ -189,6 +189,10 @@ class _ClassPageState extends State<ClassPage>{
   }
 
   Widget _buildCourseList(int index,String username){
+    String todayCourse='';
+    DataProvider.todayCourseList.forEach((row){
+      todayCourse+="第$row节 : "+DataProvider.courseList[(row-1)*5+DataProvider.todayWeek-1]["className"]+'    '+DataProvider.courseList[(row-1)*5+DataProvider.todayWeek-1]["courseName"]+'\n';
+    });
     String da=Config.weekDays[week];
     return  Card(
       clipBehavior: Clip.antiAlias,
@@ -224,7 +228,7 @@ class _ClassPageState extends State<ClassPage>{
           Row(children: <Widget>[
             Padding(padding: EdgeInsets.only(left: 15),),
             Expanded(
-              child: Text("第二节：某班级 某课程\n第三节：某班级 某课程",textAlign: TextAlign.start,),
+              child: Text(todayCourse,textAlign: TextAlign.start,),
               flex: 2,
             ),
 //            Text("臺中\n10.5'C"),

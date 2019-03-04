@@ -27,18 +27,27 @@ class DataProvider{
   static ClassRoomProvider classRoomProvider=ClassRoomProvider();
   static StudentProvider studentProvider=StudentProvider();
   static RosterProvider rosterProvider=RosterProvider();
+  static NoteProvider noteProvider=NoteProvider();
+
 
   static bool isWrite=false;
   static bool coursesChange=false;
   static bool refreshHome=false;
+
   static String courseJsonPath;
   static List<Map> courseList=[];
   static List<int> todayCourseList=[];
   static List<Student> showStudents=[];
   static int showCourseRow=-1;//可视的行,节次
-//  static int shouldCourseRow=-1;//可视的行,节次
   static Roster showRoster;
-  static Roster shouldRoster;
+  static List<Note> noteList=[
+    Note(
+      tag: 3,
+      datetime: '12-28\n11:15',
+      title: "电路考试",
+      content: '1～11章节，元月12号教室航海教室航海教室航海楼某某教室',
+    ),
+  ];
   static int todayWeek=-1;//可视的星期
 
   static int year =1970;
@@ -220,6 +229,7 @@ class DataProvider{
       await classRoomProvider.open().whenComplete(() async{
         studentProvider.open(classRoomProvider.db);
         rosterProvider.open(classRoomProvider.db);
+        noteProvider.open(classRoomProvider.db);
       });
       print("Start database finish");
       await getShowStudentsAndInitRoster();

@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
-final String dbName='/tem7.db';
+final String dbName='/ning.db';
 
 //table classroom
 final String tableClassRoom = 'classroom';
@@ -26,6 +26,13 @@ final String rosterShould = 'should';
 final String rosterAlready = 'already';
 final String rosterAbsence = 'absence';
 final String rosterLeave= 'leave';
+//table roster
+final String tableNote = 'note';
+final String noteId = 'id';
+final String noteDatetime = 'datetime';
+final String noteTag = 'tag';
+final String noteTitle = 'title';
+final String noteContent = 'content';
 
 class ClassRoom {
   int id;
@@ -97,6 +104,14 @@ create table if not exists $tableRoster (
   $rosterAbsence text,
   $rosterLeave text,
   foreign key($rosterClassId ) references $tableClassRoom($classroomId) on delete cascade)
+''');
+          await db.execute('''
+create table if not exists $tableNote ( 
+  $noteId integer primary key, 
+  $noteTag integer not null,
+  $noteDatetime varchar(12) ,
+  $noteTitle varchar(20) ,
+  $noteContent text)
 ''');
         });
   }
@@ -334,20 +349,12 @@ class RosterProvider {
   Future close() async => db.close();
 }
 
-//table roster
-final String tableNote = 'note';
-final String noteId = 'id';
-final String noteDatetime = 'datetime';
-final String noteTag = 'tag';
-final String noteTitle = 'title';
-final String noteContent = 'content';
-
 class Note {
   int id;
   String datetime;
-  int tag;
-  String title;
-  String content;
+  int tag=1;
+  String title='';
+  String content='';
 
   Note({
     this.datetime,
@@ -375,4 +382,54 @@ class Note {
     title = map[noteTitle];
     content=map[noteContent];
   }
+}
+
+class NoteProvider {
+  Database db;
+
+  void open(Database database){
+    db=database;
+  }
+
+  Future<Note> insert(Note note) async {
+    note.id = await db.insert(tableNote, note.toMap());
+    return note;
+  }
+
+  Future<Note> getRoster(int id) async {
+    List<Map> maps = await db.query(tableNote,
+        columns: [noteId, noteDatetime, noteTag,noteTitle,noteContent],
+        where: '$noteId = ?',
+        whereArgs: [id]);
+    if (maps.length > 0) {
+      return Note.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<List<Note>> getTen() async {
+    List<Map> maps = await db.query(tableNote,
+        columns: [noteId, noteDatetime, noteTag,noteTitle,noteContent],
+        limit:10,
+        orderBy: "$noteId desc",
+
+    );
+    if (maps.length > 0) {
+      return maps.map((e){
+        return Note.fromMap(e);
+      }).toList();
+    }
+    return null;
+  }
+
+  Future<int> delete(int id) async {
+    return await db.delete(tableNote, where: '$noteId = ?', whereArgs: [id]);
+  }
+
+  Future<int> update(Note note) async {
+    return await db.update(tableNote, note.toMap(),
+        where: '$noteId = ?', whereArgs: [note.id]);
+  }
+
+  Future close() async => db.close();
 }

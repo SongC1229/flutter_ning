@@ -1,65 +1,7 @@
 import 'package:flutter/material.dart';
 import 'config.dart';
 import 'dbHelper.dart';
-
-
- List<Note> _notes = [
-  Note(
-    tag: 1,
-    datetime: '1-1\n9:59',
-    title: "电路考试",
-    content: '1～11章节，元月121～11章节，元月12号教室航海楼某某教室1～11章节，元月12号教室航海楼某某教室号教室航海楼某某教室',
-  ),
-  Note(
-    tag: 2,
-    datetime: '12-30\n23:25',
-    title: "电路考试",
-    content: '1～11章 室',
-  ),
-  Note(
-    tag: 3,
-    datetime: '12-28\n11:15',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海教室航海教室航海楼某某教室',
-  ),
-  Note(
-    tag: 2,
-    datetime: '12-27\n14:59',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海楼某某教室',
-  ),
-  Note(
-    tag: 1,
-    datetime: '12-27\n14:59',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海楼某某教室',
-  ),
-  Note(
-    tag: 2,
-    datetime: '12-27\n14:59',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海楼某某教室',
-  ),
-  Note(
-    tag: 1,
-    datetime: '12-27\n14:59',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海楼某某教室',
-  ),
-  Note(
-    tag: 2,
-    datetime: '12-27\n14:59',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海楼某某教室',
-  ),
-  Note(
-    tag: 3,
-    datetime: '12-27\n14:59',
-    title: "电路考试",
-    content: '1～11章节，元月12号教室航海楼某某教室',
-  ),
-];
-
+import 'dialog_addNote.dart';
 
 class NotePage extends StatefulWidget {
   NotePage({Key key}) : super(key: key);
@@ -72,15 +14,21 @@ class NotePage extends StatefulWidget {
 
 
 class _NotePageState extends State<NotePage> {
+
+  bool notFromDB=true;
+
   void _addNote() {
-    setState(() {
-      _notes.add(  Note(
-        tag: 3,
-        datetime: '12-27\n14:59',
-        title: "电路考试",
-        content: '1～11章节，元月12号教室航海楼某某教室',
-      ));
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AddNoteDialog();
+        }).then((result){
+      setState(() {
+        notFromDB=result;
+      });
     });
+
   }
 
   Widget _buildItem(BuildContext context, Note note) {
@@ -142,8 +90,19 @@ class _NotePageState extends State<NotePage> {
         ],
       );
   }
+
   @override
   Widget build(BuildContext context) {
+    if(notFromDB&&DataProvider.noteProvider.db!=null){
+      DataProvider.noteList.clear();
+      DataProvider.noteProvider.getTen().then((list){
+        if(list!=null)
+          DataProvider.noteList=list;
+        setState(() {
+          notFromDB=false;
+        });
+      });
+    }
     return
       Scaffold(
         backgroundColor: Config.appBackground,
@@ -183,7 +142,7 @@ class _NotePageState extends State<NotePage> {
             SliverFixedExtentList(
               itemExtent: 100.0,
               delegate: SliverChildListDelegate(
-                _notes.map((product) {
+                DataProvider.noteList.map((product) {
                   return _buildItem(context,product);
                 }).toList(),
               ),
